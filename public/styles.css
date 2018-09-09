@@ -1,0 +1,128 @@
+.loginbox {
+    width : 320px;
+    height : 420px;
+    background : #fff;
+    color : #000;
+    top : 50%;
+    left : 50%;
+    position : absolute;
+    transform : translate(-50%, -50%);
+    box-sizing : border-box;
+    padding : 70px 30px;
+}
+
+.avatar {
+    width : 100px;
+    height : 100px;
+    border-radius : 50%;
+    position : absolute;
+    top : -50px;
+    left : calc(50% - 50px);
+}
+.avatar1 {
+    width : 70px;
+    height : 70px;
+    border-radius : 50%;
+    padding : 8px;
+}
+html {
+    height: 100%;
+    font-family: 'Comfortaa', sans-serif;
+}
+section#chatroom {
+    height: 85%;
+    overflow: auto;
+}
+
+section#input_zone {
+    height: 7%;
+    text-align: center;
+}
+.div1{
+    width : 20%;
+    vertical-align: middle;
+    margin: 1%;
+    float: left;
+}
+#message{
+    width : 65%;
+    vertical-align: middle;
+    margin: 1%;
+}
+.user:nth-child(even) {
+    background-color: #81DAF5;
+}
+span{
+    padding : 5px;
+}
+.user:nth-child(odd) {
+    background-color: #81BEF7;
+}
+.user{
+    height : 40px;
+    padding-bottom: 5px;
+    font-size : 12pt;
+}
+.h11 {
+    margin : 0;
+    padding : 0 0 20px;
+    text-align : center;
+    font-size : 22px;
+}
+
+.loginbox input{
+    width : 100%;
+    margin-bottom : 50px;
+}
+
+.loginbox input[type = "text"], input[type = "password"]{
+    border : none;
+    border-bottom : 1px solid #000;
+    background : transparent;
+    outline : none;
+    height : 40px;
+    color : #000;
+    font-size : 16px;
+}
+
+.loginbox input[type = "submit"]{
+    border : none;
+    outline : none;
+    height : 40px;
+    background : #00BFFF;
+    padding : 5px;
+    color : #000;
+    font-size : 18px;
+    border-radius : 20px;
+}
+
+.loginbox input[type = "submit"]:hover{
+    cursor : pointer;
+    background : #ffc107;
+    color : #000;
+}
+
+a {
+    float : right;
+    font-size : 15px;
+    color : #00BFFF;
+    top : -50px;
+}
+a:hover{
+    color : #ffc107;
+}
+#error{
+    color : red;
+    font-size : 12px;
+}
+.logout{
+    float : right;
+    font-size : 18px;
+    background-color : #00BFFF;
+    height : 60px;
+    border-radius : 20px;
+    width : 256px;
+}
+.logout:hover{
+    background-color : #ffc107;
+}
