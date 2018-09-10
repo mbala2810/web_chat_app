@@ -3,22 +3,62 @@ var bodyparser = require('body-parser');
 var session = require('express-session');
 //Mongoose for connecting to mongodb
 var mongoose = require('mongoose');
-
+var path = require('path');
+var multer = require('multer');
+var GridFsStorage = require('multer-gridfs-storage');
+var Grid = require('gridfs-stream');
+var methodOverride = require('method-override');
 //For generating md5 hash of password
 var crypto = require('crypto');
 var app = express();
-mongoose.connect('mongodb://localhost/test');
+var mongoURI = 'mongodb://localhost/test';
+mongoose.connect(mongoURI);
 var db = mongoose.connection;
+var fileuploaded;
 app.use(session({secret: 'ssshhhhh'}));
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended : true}));
+app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
 
+const conn = mongoose.createConnection(mongoURI);
+
+// Init gfs
+let gfs;
+
+conn.once('open', () => {
+  // Init stream
+  gfs = Grid(conn.db, mongoose.mongo);
+  gfs.collection('uploads');
+});
+
+// Create storage engine
+const storage = new GridFsStorage({
+  url: mongoURI,
+  file: (req, file) => {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(16, (err, buf) => {
+        if (err) {
+          return reject(err);
+        }
+        const filename = buf.toString('hex') + path.extname(file.originalname);
+		fileuploaded = filename;
+        const fileInfo = {
+          filename: filename,
+          bucketName: 'uploads'
+        };
+        resolve(fileInfo);
+      });
+    });
+  }
+});
+const upload = multer({ storage });
 var Schema = mongoose.Schema({
 	name : String,
 	college : String,
 	username : String,
-	password : String
+	password : String,
+	filename : String
 });
 var User = mongoose.model("User", Schema);
 app.use(express.static('public'));
@@ -32,11 +72,50 @@ app.get('/signup', function(req, res) {
 app.get('/login', function(req, res) {
 	res.render('login', {msg: "no error"});
 });
+app.get('/image/:filename', function(req, res){
+    gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
+        const readstream = gfs.createReadStream(file.filename);
+        readstream.pipe(res);
+    });
+});
+app.post('/imgUpload', upload.single('file'),function(req, res){
+	User.find({username:sess.username}, function(err, data){
+		if(err){
+			res.send(err);
+			return;
+		}
+		var dbname = 'uploads.files';
+		let uploads = mongoose.connection.db.collection(dbname);
+		uploads.deleteOne({filename:data[0].filename}, function(err, offer){
+			if(err){
+				res.send(err);
+				return;
+			}
+			User.findOneAndUpdate({username:sess.username},{filename:fileuploaded},{upsert:true}, function(err, user){
+				if(err){
+					res.send(err);
+					return;
+				}
+				else{
+					res.redirect('/chat');
+				}
+			});
+		});
+	});
+});
 var sess;
 app.get('/chat', function(req, res) {
 	sess = req.session;
+	console.log('hello');
 	if(sess.username) {
-		res.render('index', {username: sess.username});
+		currusername = sess.username;
+		User.find({}, function(err, data){
+			if(err){
+				console.log(err);
+				return;
+			}
+			res.render('index', {username: sess.username, data: data});
+		});
 	}
 	else{
 		res.render('login', {msg : "Please login to continue"});
@@ -56,7 +135,13 @@ app.post('/login', function(req, res){
 		}
 		else {
 			console.log(req.body);
-			var myData = new User(req.body);
+			var myData = new User({
+				name : req.body.name,
+				college : req.body.college,
+				username : req.body.username,
+				password : req.body.password,
+				filename : ""
+			});
 		    myData.save()
 		        .then(item => {
 		            res.render('login', {msg : "no error"});
@@ -76,9 +161,15 @@ app.post('/chat', function(req, res){
 		}
 		if(data.length >= 1) {
 			sess = req.session;
+			currusername = sess.username;
 			sess.username = req.body.username;
+			var data1;
 			User.find({}, function(err, data){
-				res.render('index', {username: sess.username, data: data});
+				if(err){
+					console.log(err);
+					return;
+				}
+				res.render('index', {username: sess.username, data: data, filename : data[0].filename});
 			});
 		}
 		else {

@@ -25,12 +25,50 @@
     border-radius : 50%;
     padding : 8px;
 }
+.currImage {
+    width : 320px;
+    height : 336px;
+    padding : 3%;
+}
+.currImage1 {
+    width : 400px;
+    height : 432px;
+    padding : 3%;
+}
+.avatar1:hover{
+    cursor : pointer;
+}
+.popup-overlay, .popup-overlay-image {
+    width: 50%;
+    height: 75%;
+    top: 0;
+    position: absolute;
+    display: none;
+    background-color: #d3d3d3;
+    transform: translateY(-50%);
+    transform: translateX(50%);
+}
+
+.popup-content, .popup-content-image {
+    display:none;
+}
+.popup-overlay.active, .popup-overlay-image.active{
+    display:block;
+    text-align:center;
+}
+
+.popup-content.active, .popup-content-image.active{
+    display:block;
+}
 html {
     height: 100%;
     font-family: 'Comfortaa', sans-serif;
 }
+section#header{
+    width : 500px;
+}
 section#chatroom {
-    height: 85%;
+    height: 360px;
     overflow: auto;
 }
 
@@ -46,22 +84,34 @@ section#input_zone {
 }
 #message{
     width : 65%;
+    height : 2.5em;
+    background-color: #81DAF5;
     vertical-align: middle;
+    border-radius: 20px;
     margin: 1%;
 }
 .user:nth-child(even) {
     background-color: #81DAF5;
 }
-span{
+span.username{
     padding : 5px;
+    display : inline-block;
+    width : 180px;
+    white-space: nowrap;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
 }
 .user:nth-child(odd) {
     background-color: #81BEF7;
 }
 .user{
-    height : 40px;
+    height : 70px;
     padding-bottom: 5px;
     font-size : 12pt;
+}
+#user{
+    height : 500px;
+    overflow : auto;
 }
 .h11 {
     margin : 0;

@@ -9,12 +9,14 @@
   		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
 	</head>
-	<body>
+	<body onload = "update()">
 		<nav class="navbar navbar-default">
 			<div class="container-fluid">
 				<div class="navbar-header">
 					<ul class="nav navbar-nav" style = "padding : 8px;">
-						<li style = "padding-right : 30px;"><img src = "avatar.jpg" class = "avatar1"></li>
+						<li style = "padding-right : 30px;">
+							<img src = "avatar.jpg" class = "avatar1" id = "OpenImgUpload">
+						</li>
 						<li>
 							<h1 style="font-size:28pt;">Let's Chat</h1>
 						</li>
@@ -29,16 +31,40 @@
 				</ul>
 			</div>
 		</nav>
+		<div class="popup-overlay">
+			<div class="popup-content">
+				<h3>Upload Your Profile Picture</h3>
+				<img src = "avatar.jpg" class = "currImage" id = "currImage">
+				<form action = "/imgUpload" method = "post" enctype="multipart/form-data">
+					<label for="file" class="custom-file-upload">
+					<input type="file" name="file" id="file" accept="image/jpeg, image/png" class="custom-file-upload" single required/>
+					</label>
+					<br><br>
+					<input type = "submit" name = "submit" value = "Upload" class = "btn btn-info"/>
+				</form>
+			</div>
+		</div>
+		<div class="popup-overlay-image">
+			<div class="popup-content-image">
+				<img src = "avatar.jpg" class = "currImage1" id = "clickImage">
+			</div>
+		</div>
 		<div class = "div1" id = "user">
 		</div>
-		<div>
-			<section id="chatroom">
-				<section id="feedback"></section>
+		<div id = "chatbox" style = "display:none;">
+			<section id = "header" style = " border: 5px outset #81BEF7; margin-left : 25%;width : 72%;background-color:#81DAF5;">
+				<div>
+					<img src = "avatar.jpg" class = "avatar1" id = "sendUserImage">
+					<span id = "send_user" style="font-size:20pt;"></span>
+				</div>
+			</section>
+			<section id="chatroom" style = "margin-left : 25%;border: 5px outset #81BEF7;width : 72%;background-color:#81DAF5;">
+				<section id="feedback">hello</section>
 			</section>
 
 			<section id="input_zone">
-				<input id="message" type="text" />
-				<button id="send_message" type="button">Send</button>
+				<input id="message" type="text" placeholder = "Type a message"/>
+				<img id = "send_message" src = "send.png" class = "avatar1">
 			</section>
 		</div>
 		<script src="http://code.jquery.com/jquery-latest.min.js"></script>
