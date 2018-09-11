@@ -1,4 +1,7 @@
 var c = 1;
+var send_user;
+var send_user_image;
+var send_name;
 function clickfunc(file){
 	console.log("hello");
 	if(c == 1){
@@ -18,9 +21,9 @@ function openChat(id){
 	document.getElementById('chatbox').style.display = "block";
 	console.log(id);
 	var a = id.split('_');
-	var send_user = a[0];
-	var send_user_image = a[1];
-	var send_name = a[2];
+	send_user = a[0];
+	send_user_image = a[1];
+	send_name = a[2];
 	document.getElementById('send_user').innerHTML = '<b>' + send_name + '</b>';
 	if(send_user_image == "")
 		$('#sendUserImage').attr('src', 'avatar.jpg');
@@ -28,14 +31,45 @@ function openChat(id){
 		console.log('helo');
 		$('#sendUserImage').attr('src', 'image/' + send_user_image);
 	}
+
+	var getChatsObject = {"senderId": username, "receiverId" : send_user};
+	// request.get('/allChats').query(getChatsObject).then(res => {
+	// 	//inflate all chats here
+	// })
+
+	// $.ajax({
+  //       url: 'localhost:4000/allChats',
+  //       data: getChatsObject,
+  //       type: 'GET',
+  //       success: function (data) {
+  //           var allChats = jQuery.parseJSON(data);
+  //           console.log('Success: ')
+	// 					//Inflate all chats here
+	// 					var numberOfChats = len(allChats);
+	// 					for(i=0;i<numberOfChats;i++){
+	// 						if(allChats[i]['senderId'] == username){
+	// 							chatroom.append("<style float='right'><p class='message'></style>" + allChats[i]['senderId'] + ": " + allChats[i]['contents'] + "</p>");
+	// 						}else{
+	// 							chatroom.append("<style float='left'><p class='message'></style>" + allChats[i]['senderId'] + ": " + allChats[i]['contents'] + "</p>");
+	// 						}
+	// 					}
+  //       },
+  //       error: function (xhr, status, error) {
+  //           console.log('Error: ' + error.message);
+  //       },
+  //   });
+
+
 }
 $(function() {
-	var socket = io.connect('http://localhost:3000');
+	var socket = io.connect('http://localhost:4000');
 	var message = $("#message");
 	var chatroom = $("#chatroom");
 	var feedback = $("#feedback");
+	var send_message = $("#send_message");
 	var div = $("#user");
 	var count = 0;
+	console.log("Pikaboo!!");
 	$('#OpenImgUpload').click(function(){
 		if(count == 0) {
 			$(".popup-overlay, .popup-content").addClass('active');
@@ -73,7 +107,7 @@ $(function() {
 			img.setAttribute('class', 'avatar1');
 			var fname;
 			if(data[i].filename == ""){
-				img.setAttribute('src', 'avatar.jpg');
+				img.setAttribute('src', './avatar.jpg');
 				fname = 'avatar.jpg';
 			}
 			else {
@@ -91,14 +125,23 @@ $(function() {
 	}
 	//Emit message
 	send_message.click(function(){
-		socket.emit('new_message', {message : message.val()});
+		console.log("button clicked");
+		var messageObject = {"senderId": username,"receiverId": send_user,"contents": message.val(),"timeStamp": "123456"};
+		socket.emit('new_message', {"senderId": username,"receiverId": send_user,"contents": message.val(),"timeStamp": "123456"});
 	});
 
 	//Listen on new_message
-	socket.on("new_message", (data) => {
+	socket.on("newMessage", (params) => {
+		//const params = JSON.parse(_params);
+		const senderId = params.senderId;
+		const receiverId = params.receiverId;
+		const contents = params.contents;
+		const chatTimeStamp = params.timeStamp;
+
+		console.log(params);
 		feedback.html('');
 		message.val('');
-		chatroom.append("<p class='message'>" + data.username + ": " + data.message + "</p>");
+		chatroom.append("<style float='left'><p class='message'></style>" + senderId + ": " + contents + "</p>");
 	});
 
 	//Emit typing

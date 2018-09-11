@@ -60,7 +60,19 @@ var Schema = mongoose.Schema({
 	password : String,
 	filename : String
 });
+
+var MessageSchema = mongoose.Schema ({
+	sender : String,
+	receiver : String,
+	contents : String,
+	timeStamp : String
+});
+
 var User = mongoose.model("User", Schema);
+var Message = mongoose.model("Message",MessageSchema);
+
+const sockets = {};
+
 app.use(express.static('public'));
 
 app.get('/', function(req, res) {
@@ -169,7 +181,9 @@ app.post('/chat', function(req, res){
 					console.log(err);
 					return;
 				}
+        //console.log(data);
 				res.render('index', {username: sess.username, data: data, filename : data[0].filename});
+        console.log("booo");
 			});
 		}
 		else {
@@ -187,7 +201,23 @@ app.post('/logout', function(req, res){
 		}
 	});
 });
-server = app.listen(3000);
+app.get('/allChats/:usernames',function(req,res){
+  var senderId = req.params.senderId;
+  var receiverId = req.params.receiverId;
+  // query here
+  Message.find({ $or: [ { senderId: senderId } , { senderId: receiverId } ] }, {"sort" : ['timeStamp', 'asc']} ).toArray(function(err,data) {
+    if(err){
+      res.send(err);
+      return;
+    }
+    else{
+      res.send(data.toJSON());
+      return;
+    }
+  });
+  //Message.find({ $or: [ { senderId: senderId } , { senderId: receiverId } ] }).sort({ timeStamp : 1 })
+});
+server = app.listen(4000);
 
 var io = require('socket.io')(server);
 
@@ -197,7 +227,11 @@ io.on('connection', (socket) => {
 		//default username
 		if(sess) {
 			socket.username = sess.username;
+      console.log("boo");
+      console.log(sess.username);
 		}
+    sockets[socket.username] = socket;
+    //console.log(sess.username);
 		// listen on change_username
 		// socket.on('change_username', (data) => {
 		// 	console.log(data);
@@ -205,13 +239,38 @@ io.on('connection', (socket) => {
 		// });
 
 	//listen on new_message
-	socket.on('new_message', (data) => {
-		//broadcast the new message
-		io.sockets.emit('new_message', {message : data.message, username : socket.username});
-	});
+	socket.on('new_message', (params) => {
+    console.log("Inside listener");
+    //const params = JSON.parse(_params);
+		const senderId = params.senderId;
+		const receiverId = params.receiverId;
+		const contents = params.contents;
+		const chatTimeStamp = params.timeStamp;
+
+		// Have to insert the message into the database.
+    var tempMessage = new Message({
+      sender : senderId,
+      receiver : receiverId,
+      contents : contents,
+      timeStamp : chatTimeStamp
+    });
+
+		if(sockets[receiverId]){
+			const toSocket = sockets[receiverId];
+			toSocket.emit('newMessage', params);
+		} else{
+			console.log("User not connected to socket");
+		}
+  });
 
 	//listen on typing
 	socket.on('typing', (data) => {
 		socket.broadcast.emit('typing', {username : socket.username});
 	});
 });
+
+/*
+db.Message.find(
+  { $or: [ { senderId: senderId } , { senderId: receiverId } ] }
+).sort({ timeStamp : 1 })
+*/
