@@ -126,7 +126,7 @@ $(function() {
 	//Emit message
 	send_message.click(function(){
 		console.log("button clicked");
-		var messageObject = {"senderId": username,"receiverId": send_user,"contents": message.val(),"timeStamp": "123456"};
+		chatroom.append("<style float='right'><p class='message'></style>" + senderId + ": " + contents + "</p>");
 		socket.emit('new_message', {"senderId": username,"receiverId": send_user,"contents": message.val(),"timeStamp": "123456"});
 	});
 
