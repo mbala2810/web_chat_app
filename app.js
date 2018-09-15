@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyparser = require('body-parser');
 var session = require('express-session');
+var cors = require('cors');
 //Mongoose for connecting to mongodb
 var mongoose = require('mongoose');
 var path = require('path');
@@ -20,7 +21,7 @@ app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended : true}));
 app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
-
+app.use(cors());
 const conn = mongoose.createConnection(mongoURI);
 
 // Init gfs
@@ -201,17 +202,23 @@ app.post('/logout', function(req, res){
 		}
 	});
 });
-app.get('/allChats/:usernames',function(req,res){
-  var senderId = req.params.senderId;
-  var receiverId = req.params.receiverId;
-  // query here
-  Message.find({ $or: [ { senderId: senderId } , { senderId: receiverId } ] }, {"sort" : ['timeStamp', 'asc']} ).toArray(function(err,data) {
+app.get('/allChats',function(req,res){
+  var senderId, receiverId;
+  var x = req.url.split('=');
+  var y = x[1].split('&');
+  senderId = y[0];
+  receiverId = x[2];
+  console.log(senderId);
+  console.log(receiverId);
+  // query here , {"sort" : ['timeStamp', 'asc']}
+  Message.find({ $or: [ { sender: senderId, receiver: receiverId } , { sender: receiverId, receiver: senderId} ]}).sort({timeStamp : 1}).exec(function(err,data) {
     if(err){
       res.send(err);
       return;
     }
     else{
-      res.send(data.toJSON());
+      console.log(data);
+      res.send(data);
       return;
     }
   });
@@ -240,7 +247,7 @@ io.on('connection', (socket) => {
 
 	//listen on new_message
 	socket.on('new_message', (params) => {
-    console.log("Inside listener");
+        console.log("Inside listener");
     //const params = JSON.parse(_params);
 		const senderId = params.senderId;
 		const receiverId = params.receiverId;
@@ -248,15 +255,16 @@ io.on('connection', (socket) => {
 		const chatTimeStamp = params.timeStamp;
 
 		// Have to insert the message into the database.
-    var tempMessage = new Message({
-      sender : senderId,
-      receiver : receiverId,
-      contents : contents,
-      timeStamp : chatTimeStamp
-    });
-
+        var tempMessage = new Message({
+          sender : senderId,
+          receiver : receiverId,
+          contents : contents,
+          timeStamp : chatTimeStamp
+        });
+        tempMessage.save();
 		if(sockets[receiverId]){
 			const toSocket = sockets[receiverId];
+            console.log("received");
 			toSocket.emit('newMessage', params);
 		} else{
 			console.log("User not connected to socket");

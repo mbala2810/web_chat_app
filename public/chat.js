@@ -17,6 +17,21 @@ function clickfunc(file){
 		c = 1;
 	}
 }
+function cutAndJoinContent(contents){
+	var a = "", final = "";
+	var l = contents.length;
+	if(l < 54){
+		return contents;
+	}
+	for(var i = 0; i < l; i++){
+		a += contents[i];
+		if(i % 54 == 0 && i != 0){
+			final += a + "<br>";
+			a = "";
+		}
+	}
+	return final + a;
+}
 function openChat(id){
 	document.getElementById('chatbox').style.display = "block";
 	console.log(id);
@@ -27,37 +42,41 @@ function openChat(id){
 	document.getElementById('send_user').innerHTML = '<b>' + send_name + '</b>';
 	if(send_user_image == "")
 		$('#sendUserImage').attr('src', 'avatar.jpg');
-	else {
-		console.log('helo');
+	else
 		$('#sendUserImage').attr('src', 'image/' + send_user_image);
-	}
 
-	var getChatsObject = {"senderId": username, "receiverId" : send_user};
+	var getChatsObject = {"senderId": "" + username, "receiverId" : "" + send_user};
 	// request.get('/allChats').query(getChatsObject).then(res => {
 	// 	//inflate all chats here
+	// 	console.log("How you doin?")
+	// 	console.log(res);
 	// })
-
-	// $.ajax({
-  //       url: 'localhost:4000/allChats',
-  //       data: getChatsObject,
-  //       type: 'GET',
-  //       success: function (data) {
-  //           var allChats = jQuery.parseJSON(data);
-  //           console.log('Success: ')
-	// 					//Inflate all chats here
-	// 					var numberOfChats = len(allChats);
-	// 					for(i=0;i<numberOfChats;i++){
-	// 						if(allChats[i]['senderId'] == username){
-	// 							chatroom.append("<style float='right'><p class='message'></style>" + allChats[i]['senderId'] + ": " + allChats[i]['contents'] + "</p>");
-	// 						}else{
-	// 							chatroom.append("<style float='left'><p class='message'></style>" + allChats[i]['senderId'] + ": " + allChats[i]['contents'] + "</p>");
-	// 						}
-	// 					}
-  //       },
-  //       error: function (xhr, status, error) {
-  //           console.log('Error: ' + error.message);
-  //       },
-  //   });
+	var data;
+	$.ajax({
+        url: 'http://localhost:4000/allChats',
+        data: getChatsObject,
+        type: 'GET',
+        success: function (data) {
+            //var allChats = data;
+			console.log(data);
+            console.log('Success: ');
+						//Inflate all chats here
+			var numberOfChats = data.length;
+			document.getElementById("chatroom").innerHTML = "";
+			for(i = 0; i < numberOfChats; i++) {
+				var timeStamp = new Date(data[i].timeStamp);
+				var contents = cutAndJoinContent(data[i].contents);
+				if(data[i].sender == username){
+					document.getElementById("chatroom").innerHTML += ("<p class='senderMessage' style = 'float : right' ><b>" + data[i].sender + "</b><br>" + contents + "<br>" + "<span style = 'float : right; font-size : 0.8vw'>" + timeStamp.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}) + "</span>" + "<br>" + "</p>");
+				}else{
+					document.getElementById("chatroom").innerHTML += ("<p class='receiverMessage' style = 'float : left' ><b>" + data[i].sender + "</b><br>" + contents + "<br>" + "<span style = 'float : right; font-size : 0.8vw'>" + timeStamp.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}) + "</span>" + "<br>" + "</p>");
+				}
+			}
+        },
+        error: function (xhr, status, error) {
+            console.log('Error: ' + error.message);
+        },
+    });
 
 
 }
@@ -65,11 +84,9 @@ $(function() {
 	var socket = io.connect('http://localhost:4000');
 	var message = $("#message");
 	var chatroom = $("#chatroom");
-	var feedback = $("#feedback");
 	var send_message = $("#send_message");
 	var div = $("#user");
 	var count = 0;
-	console.log("Pikaboo!!");
 	$('#OpenImgUpload').click(function(){
 		if(count == 0) {
 			$(".popup-overlay, .popup-content").addClass('active');
@@ -116,18 +133,28 @@ $(function() {
 			}
 			img.setAttribute('onclick', 'clickfunc('+ '\"'+ fname + '\"' +')');
 			d.append(img);
+			var s1 = document.createElement("span");
+			var feedback = "feedback_" + data[i].username;
+			s1.setAttribute('id', feedback);
+			s1.setAttribute('class', 'feedback');
 			var span = document.createElement("span");
 			span.setAttribute('class', 'username');
 			span.innerHTML = '<b>' + data[i].name + '</b>';
 			d.append(span);
+			d.append(s1);
 			div.append(d);
 		}
 	}
 	//Emit message
 	send_message.click(function(){
 		console.log("button clicked");
-		chatroom.append("<style float='right'><p class='message'></style>" + senderId + ": " + contents + "</p>");
-		socket.emit('new_message', {"senderId": username,"receiverId": send_user,"contents": message.val(),"timeStamp": "123456"});
+		var timeStamp = new Date();
+		var contents = cutAndJoinContent(message.val());
+		chatroom.append("<p class='senderMessage' style = 'float : right' ><b>" + username + "</b><br>" + contents + "<br>" + "<span style = 'float : right; font-size : 0.8vw'>" + timeStamp.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}) + "</span>" + "<br>" + "</p>" + "<br>");
+		socket.emit('new_message', {"senderId": username,"receiverId": send_user,"contents": message.val(),"timeStamp": timeStamp});
+		var feedback = "feedback_" + data.username;
+		document.getElementById(feedback).innerHTML = "";
+		document.getElementById("message").value = "";
 	});
 
 	//Listen on new_message
@@ -135,13 +162,12 @@ $(function() {
 		//const params = JSON.parse(_params);
 		const senderId = params.senderId;
 		const receiverId = params.receiverId;
-		const contents = params.contents;
-		const chatTimeStamp = params.timeStamp;
-
+		var contents = params.contents;
+		var chatTimeStamp = new Date(params.timeStamp);
+		console.log(chatTimeStamp);
 		console.log(params);
-		feedback.html('');
-		message.val('');
-		chatroom.append("<style float='left'><p class='message'></style>" + senderId + ": " + contents + "</p>");
+		var contents = cutAndJoinContent(contents);
+		chatroom.append("<p class='receiverMessage'><b>" + senderId + "</b><br>" + contents + "<br>" + "<span style = 'float : right; font-size : 0.8vw'>" + chatTimeStamp.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}) + "</span>" + "<br>" + "</p>" + "<br>");
 	});
 
 	//Emit typing
@@ -151,7 +177,8 @@ $(function() {
 
 	//Listen on typing
 	socket.on('typing', (data) => {
-		feedback.html("<p><i>" + data.username + " is typing a message..." + "</i></p>");
+		var feedback = "feedback_" + data.username;
+		document.getElementById(feedback).innerHTML = "<i>typing...</i>";
 	});
 
 });

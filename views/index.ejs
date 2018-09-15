@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<title>Chat App</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link href="http://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet" type="text/css">
 		<link rel="stylesheet" type="text/css" href="styles.css" >
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -9,7 +10,7 @@
   		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
 	</head>
-	<body onload = "update()">
+	<body onload = "update()" style = "white-space: nowrap;">
 		<nav class="navbar navbar-default">
 			<div class="container-fluid">
 				<div class="navbar-header">
@@ -18,7 +19,7 @@
 							<img src = "avatar.jpg" class = "avatar1" id = "OpenImgUpload">
 						</li>
 						<li>
-							<h1 style="font-size:28pt;">Let's Chat</h1>
+							<h1 style="font-size:2.5vw;">Let's Chat</h1>
 						</li>
 					</ul>
 				</div>
@@ -55,11 +56,11 @@
 			<section id = "header" style = " border: 5px outset #81BEF7; margin-left : 25%;width : 72%;background-color:#81DAF5;">
 				<div>
 					<img src = "avatar.jpg" class = "avatar1" id = "sendUserImage">
-					<span id = "send_user" style="font-size:20pt;"></span>
+					<span id = "send_user" style="font-size:2vw;"></span>
 				</div>
 			</section>
 			<section id="chatroom" style = "margin-left : 25%;border: 5px outset #81BEF7;width : 72%;background-color:#81DAF5;">
-				<section id="feedback">hello</section>
+				<!-- <section id="feedback"></section> -->
 			</section>
 
 			<section id="input_zone">
