@@ -2,6 +2,7 @@ var c = 1;
 var send_user;
 var send_user_image;
 var send_name;
+var isGroup;
 function clickfunc(file){
 	console.log("hello");
 	if(c == 1){
@@ -39,18 +40,21 @@ function openChat(id){
 	send_user = a[0];
 	send_user_image = a[1];
 	send_name = a[2];
+	isGroup = a[3];
+
 	document.getElementById('send_user').innerHTML = '<b>' + send_name + '</b>';
 	if(send_user_image == "")
 		$('#sendUserImage').attr('src', 'avatar.jpg');
 	else
 		$('#sendUserImage').attr('src', 'image/' + send_user_image);
 
-	var getChatsObject = {"senderId": "" + username, "receiverId" : "" + send_user};
-	// request.get('/allChats').query(getChatsObject).then(res => {
-	// 	//inflate all chats here
-	// 	console.log("How you doin?")
-	// 	console.log(res);
-	// })
+	var getChatsObject;
+	if(isGroup == "True"){
+			getChatsObject = {"senderId": "" + "Group_Message", "receiverId" : "" + send_user};
+	}else{
+			getChatsObject = {"senderId": "" + username, "receiverId" : "" + send_user};
+	}
+
 	var data;
 	$.ajax({
         url: 'http://localhost:4000/allChats',
@@ -116,7 +120,7 @@ $(function() {
 		}
 		if(data[i].username != username) {
 			var d = document.createElement("div");
-			var id = data[i].username + "_" + data[i].filename + "_" + data[i].name;
+			var id = data[i].username + "_" + data[i].filename + "_" + data[i].name + "_" + data[i].group;
 			d.setAttribute("id", id);
 			d.setAttribute("class", "user");
 			d.setAttribute('onclick', 'openChat('+'\"' + id + '\"' +')');
@@ -164,10 +168,27 @@ $(function() {
 		const receiverId = params.receiverId;
 		var contents = params.contents;
 		var chatTimeStamp = new Date(params.timeStamp);
+		var otherId = senderId;
 		console.log(chatTimeStamp);
 		console.log(params);
-		var contents = cutAndJoinContent(contents);
-		chatroom.append("<p class='receiverMessage'><b>" + senderId + "</b><br>" + contents + "<br>" + "<span style = 'float : right; font-size : 0.8vw'>" + chatTimeStamp.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}) + "</span>" + "<br>" + "</p>" + "<br>");
+		//Get otherId
+		if(senderId != username && receiverId != username){
+			otherId = receiverId;
+		}
+		//Get current chatroom
+		var currentChatRoom = false;
+		if(otherId == send_user){
+			currentChatRoom = true;
+		}
+		//Inflate or show popup correspondingly
+		if(currentChatRoom){
+			var contents = cutAndJoinContent(contents);
+			chatroom.append("<p class='receiverMessage'><b>" + senderId + "</b><br>" + contents + "<br>" + "<span style = 'float : right; font-size : 0.8vw'>" + chatTimeStamp.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}) + "</span>" + "<br>" + "</p>" + "<br>");
+		} else{
+			// TODO:  Show new Message with differnet color pop-up
+		}
+
+
 	});
 
 	//Emit typing
@@ -177,6 +198,7 @@ $(function() {
 
 	//Listen on typing
 	socket.on('typing', (data) => {
+		// TODO: Check if otherId idea is applicable here.
 		var feedback = "feedback_" + data.username;
 		document.getElementById(feedback).innerHTML = "<i>typing...</i>";
 	});

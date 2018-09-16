@@ -69,8 +69,14 @@ var MessageSchema = mongoose.Schema ({
 	timeStamp : String
 });
 
+var GroupSchema = mongoose.Schema({
+  username : String,
+  members : [String]
+});
+
 var User = mongoose.model("User", Schema);
 var Message = mongoose.model("Message",MessageSchema);
+var Group = mongoose.model("Group",GroupSchema);
 
 const sockets = {};
 
@@ -208,20 +214,38 @@ app.get('/allChats',function(req,res){
   var y = x[1].split('&');
   senderId = y[0];
   receiverId = x[2];
+  var groupChat = false;
+  if(receiverId == "Group_Message")
+    groupChat = true;
   console.log(senderId);
   console.log(receiverId);
   // query here , {"sort" : ['timeStamp', 'asc']}
-  Message.find({ $or: [ { sender: senderId, receiver: receiverId } , { sender: receiverId, receiver: senderId} ]}).sort({timeStamp : 1}).exec(function(err,data) {
-    if(err){
-      res.send(err);
-      return;
-    }
-    else{
-      console.log(data);
-      res.send(data);
-      return;
-    }
-  });
+  if(groupChat){
+    Message.find({ receiver: receiverId }).sort({timeStamp : 1}).exec(function(err,data) {
+      if(err){
+        res.send(err);
+        return;
+      }
+      else{
+        console.log(data);
+        res.send(data);
+        return;
+      }
+    });
+  }else{
+    Message.find({ $or: [ { sender: senderId, receiver: receiverId } , { sender: receiverId, receiver: senderId} ]}).sort({timeStamp : 1}).exec(function(err,data) {
+      if(err){
+        res.send(err);
+        return;
+      }
+      else{
+        console.log(data);
+        res.send(data);
+        return;
+      }
+    });
+  }
+
   //Message.find({ $or: [ { senderId: senderId } , { senderId: receiverId } ] }).sort({ timeStamp : 1 })
 });
 server = app.listen(4000);
@@ -254,21 +278,65 @@ io.on('connection', (socket) => {
 		const contents = params.contents;
 		const chatTimeStamp = params.timeStamp;
 
-		// Have to insert the message into the database.
-        var tempMessage = new Message({
-          sender : senderId,
-          receiver : receiverId,
-          contents : contents,
-          timeStamp : chatTimeStamp
-        });
-        tempMessage.save();
-		if(sockets[receiverId]){
-			const toSocket = sockets[receiverId];
-            console.log("received");
-			toSocket.emit('newMessage', params);
-		} else{
-			console.log("User not connected to socket");
-		}
+    var normalMessge = true;
+    var group = receiverId.split(',');
+    if(len(group) > 1){
+      const groupId = group[1];
+      normalMessge = false;
+    }
+
+    if(normalMessge){
+      // Have to insert the message into the database.
+      var tempMessage = new Message({
+        sender : senderId,
+        receiver : receiverId,
+        contents : contents,
+        timeStamp : chatTimeStamp
+      });
+      tempMessage.save();
+  		if(sockets[receiverId]){
+  			const toSocket = sockets[receiverId];
+        console.log("received");
+  			toSocket.emit('newMessage', params);
+  		} else{
+  			console.log("User not connected to socket");
+  		}
+    } else{
+      //First fetch all group members
+      groupMembers = []
+      Group.find({username : groupId }).exec(function(err,data) {
+        if(err){
+          res.send(err);
+          return;
+        }
+        else{
+          console.log(data);
+          for(i=0;i<len(data.members);i++){
+            groupMembers.append(data.members[i]);
+          }
+
+          var tempMessage = new Message({
+            sender : senderId,
+            receiver : groupId,
+            contents : contents,
+            timeStamp : chatTimeStamp
+          });
+          tempMessage.save();
+
+          for(i=0;i<len(groupMembers);i++){
+            if(socket[groupMembers[i]] && groupMembers[i] != senderId){
+              const toSocket = sockets[receiverId];
+              console.log("received");
+        			toSocket.emit('newMessage', {"senderId": senderId,"receiverId": groupId,"contents": contents,"timeStamp": chatTimeStamp});
+            }
+          }
+          return;
+        }
+      });
+      //Insert separate entry into db for all group members
+      //Emit to online users
+    }
+
   });
 
 	//listen on typing
