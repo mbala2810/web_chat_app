@@ -69,8 +69,15 @@ var MessageSchema = mongoose.Schema ({
 	timeStamp : String
 });
 
+var GroupSchema = mongoose.Schema({
+  username : String,
+  members : [String],
+  filename : String
+});
+
 var User = mongoose.model("User", Schema);
 var Message = mongoose.model("Message",MessageSchema);
+var Group = mongoose.model("Group",GroupSchema);
 
 const sockets = {};
 
@@ -121,13 +128,20 @@ app.get('/chat', function(req, res) {
 	sess = req.session;
 	console.log('hello');
 	if(sess.username) {
-		currusername = sess.username;
+		currusername = sess.username + "";
 		User.find({}, function(err, data){
 			if(err){
 				console.log(err);
 				return;
 			}
-			res.render('index', {username: sess.username, data: data});
+            Group.find({members:data[0].username}, function(err, data1){
+                if(err){
+                    console.log(err);
+                    return;
+                }
+                console.log(data1);
+                res.render('index', {username: sess.username, data: data, group: data1});
+            });
 		});
 	}
 	else{
@@ -174,7 +188,7 @@ app.post('/chat', function(req, res){
 		}
 		if(data.length >= 1) {
 			sess = req.session;
-			currusername = sess.username;
+			currusername = sess.username + "";
 			sess.username = req.body.username;
 			var data1;
 			User.find({}, function(err, data){
@@ -182,9 +196,15 @@ app.post('/chat', function(req, res){
 					console.log(err);
 					return;
 				}
-        //console.log(data);
-				res.render('index', {username: sess.username, data: data, filename : data[0].filename});
-        console.log("booo");
+                Group.find({members: data[0].username}, function(err, data1){
+                    if(err){
+                        console.log(err);
+                        return;
+                    }
+                    console.log(data1);
+                    res.render('index', {username: sess.username, data: data, filename : data[0].filename, group : data1});
+                console.log("booo");
+                });
 			});
 		}
 		else {
@@ -203,26 +223,48 @@ app.post('/logout', function(req, res){
 	});
 });
 app.get('/allChats',function(req,res){
-  var senderId, receiverId;
-  var x = req.url.split('=');
-  var y = x[1].split('&');
-  senderId = y[0];
-  receiverId = x[2];
-  console.log(senderId);
-  console.log(receiverId);
-  // query here , {"sort" : ['timeStamp', 'asc']}
-  Message.find({ $or: [ { sender: senderId, receiver: receiverId } , { sender: receiverId, receiver: senderId} ]}).sort({timeStamp : 1}).exec(function(err,data) {
-    if(err){
-      res.send(err);
-      return;
-    }
-    else{
-      console.log(data);
-      res.send(data);
-      return;
-    }
-  });
+    var senderId, receiverId;
+    var x = req.url.split('=');
+    var y = x[1].split('&');
+    senderId = y[0];
+    receiverId = x[2];
+    console.log(senderId);
+    console.log(receiverId);
+    // query here , {"sort" : ['timeStamp', 'asc']}
+    Message.find({ $or: [ { sender: senderId, receiver: receiverId } , { sender: receiverId, receiver: senderId} ]}).sort({timeStamp : 1}).exec(function(err,data) {
+        if(err){
+          res.send(err);
+          return;
+        }
+        else{
+          console.log(data);
+          res.send(data);
+          return;
+        }
+    });
   //Message.find({ $or: [ { senderId: senderId } , { senderId: receiverId } ] }).sort({ timeStamp : 1 })
+});
+app.post('/createGroup', function(req, res){
+    console.log(req.body);
+    var group = new Group({
+        username : req.body.groupName,
+        members : req.body.users,
+        filename : ""
+    });
+    Group.find({username:req.body.groupName}, function(err, data){
+        if(err){
+            console.log(err);
+            return;
+        }
+        if(data.length >= 1){
+            res.send("Failed");
+        }
+        else{
+            group.save();
+            res.send("Success");
+        }
+    });
+    return;
 });
 server = app.listen(4000);
 

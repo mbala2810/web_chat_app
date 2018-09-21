@@ -39,17 +39,29 @@
 	cursor : pointer;
 }
 .popup-overlay, .popup-overlay-image {
-	width: 50%;
-	height: 75%;
-	top: 0;
-	position: absolute;
-	display: none;
-	background-color: #d3d3d3;
-	transform: translateY(-50%);
-	transform: translateX(50%);
+	/* width: 50%;
+	height: 75%; */
+	position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    text-align:center;
+	background-color: black;
+	color : #d3d3d3;
+	/* transform: translateY(-50%);
+	transform: translateX(50%); */
+	display : none;
 }
 
 .popup-content, .popup-content-image {
+	position: absolute;
+    top: 50%;
+    left:0;
+    right:0;
+    transform: translateY(-50%);
+    display:block;
+    text-align:center
 	display:none;
 }
 .popup-overlay.active, .popup-overlay-image.active{
@@ -90,6 +102,14 @@ section#input_zone {
 	vertical-align: middle;
 	border-radius: 20px;
 	margin: 1%;
+}
+#groupName{
+	width : 25%;
+	height : 2.5em;
+	background-color: #d3d3d3;
+	vertical-align: middle;
+	border-radius: 20px;
+	margin: 2%;
 }
 
 .message, .senderMessage, .receiverMessage{
@@ -209,4 +229,64 @@ a:hover{
 }
 .logout:hover{
 	background-color : #ffc107;
+}
+
+
+#groupPopup {
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    text-align:center;
+	background-color: black;
+}
+#groupPopup>div.wrapper {
+    position: absolute;
+    top: 50%;
+    left:0;
+    right:0;
+    transform: translateY(-50%);
+    display:block;
+    text-align:center
+	color : #d3d3d3;
+}
+#groupPopup .content {
+    /* display:inline-block; */
+	height : 30vw;
+	transform: translateX(50%);
+	background-color: #d3d3d3;
+	overflow: auto;
+	text-align: center;
+	padding : 5%;
+    /* border:1px solid blue //For visual feedback.*/
+    max-width:50%; //In case you want to restrict the div width
+}
+
+.closeImage, .close{
+	float : right;
+	margin : 2%;
+	margin-left: 0%;
+	padding : 1%;
+	font-size : 1vw;
+	border-radius: 50%;
+	color: #d3d3d3;
+	background-color: #ffc107;
+}
+.close:hover {
+	pointer: cursor;
+}
+.closeImage:hover{
+	pointer: cursor;
+}
+.closeImage{
+	margin-top : -5%;
+}
+
+table{
+	margin : 3%;
+}
+td, th{
+	padding : 8%;
+	text-align : left;
 }

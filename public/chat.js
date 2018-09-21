@@ -1,21 +1,14 @@
-var c = 1;
 var send_user;
 var send_user_image;
 var send_name;
+var isgroup;
 function clickfunc(file){
 	console.log("hello");
-	if(c == 1){
 		if(file == 'avatar.jpg')
 			$('#clickImage').attr('src', file);
 		else
 			$('#clickImage').attr('src', 'image/' + file);
 		$(".popup-overlay-image, .popup-content-image").addClass('active');
-		c = 0;
-	}
-	else{
-		$(".popup-overlay-image, .popup-content-image").removeClass('active');
-		c = 1;
-	}
 }
 function cutAndJoinContent(contents){
 	var a = "", final = "";
@@ -34,18 +27,34 @@ function cutAndJoinContent(contents){
 }
 function openChat(id){
 	document.getElementById('chatbox').style.display = "block";
-	console.log(id);
+	console.log(document.getElementById(id).style.backgroundColor);
+	if(document.getElementById(id).style.backgroundColor == "rgb(36, 242, 36)"){
+		var chatbar = document.getElementsByClassName('user');
+		for(var i = 1; i < chatbar.length; i++){
+			if(chatbar[i].id == id){
+				if(i % 2 == 0)
+					chatbar[i].style.backgroundColor = "#81BEF7";
+				else {
+					chatbar[i].style.backgroundColor = "#81DAF5" ;
+				}
+				break;
+			}
+		}
+	}
 	var a = id.split('_');
 	send_user = a[0];
 	send_user_image = a[1];
 	send_name = a[2];
+	isgroup = a[3];
 	document.getElementById('send_user').innerHTML = '<b>' + send_name + '</b>';
 	if(send_user_image == "")
 		$('#sendUserImage').attr('src', 'avatar.jpg');
 	else
 		$('#sendUserImage').attr('src', 'image/' + send_user_image);
 
-	var getChatsObject = {"senderId": "" + username, "receiverId" : "" + send_user};
+	var getChatsObject = {};
+	getChatsObject.senderId = username;
+	getChatsObject.receiverId = send_user;
 	// request.get('/allChats').query(getChatsObject).then(res => {
 	// 	//inflate all chats here
 	// 	console.log("How you doin?")
@@ -72,6 +81,8 @@ function openChat(id){
 					document.getElementById("chatroom").innerHTML += ("<p class='receiverMessage' style = 'float : left' ><b>" + data[i].sender + "</b><br>" + contents + "<br>" + "<span style = 'float : right; font-size : 0.8vw'>" + timeStamp.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}) + "</span>" + "<br>" + "</p>");
 				}
 			}
+			var msg = document.getElementById("chatroom");
+			msg.scrollTop = msg.scrollHeight;
         },
         error: function (xhr, status, error) {
             console.log('Error: ' + error.message);
@@ -80,29 +91,109 @@ function openChat(id){
 
 
 }
+function addUserToDiv(div, username, filename, name, isGroup){
+	var id = username + "_" + filename + "_" + name + "_" + isGroup;
+	var d = document.createElement("div");
+	d.setAttribute("id", id);
+	d.setAttribute("class", "user");
+	d.setAttribute('onclick', 'openChat('+'\"' + id + '\"' +')');
+	var img = document.createElement("img");
+	img.setAttribute('class', 'avatar1');
+	var fname;
+	if(filename == ""){
+		img.setAttribute('src', './avatar.jpg');
+		fname = 'avatar.jpg';
+	}
+	else {
+		img.setAttribute('src', 'image/' + filename);
+		fname = filename;
+	}
+	img.setAttribute('onclick', 'clickfunc('+ '\"'+ fname + '\"' +')');
+	d.append(img);
+	var s1 = document.createElement("span");
+	var feedback = "feedback_" + username;
+	s1.setAttribute('id', feedback);
+	s1.setAttribute('class', 'feedback');
+	var span = document.createElement("span");
+	span.setAttribute('class', 'username');
+	span.innerHTML = '<b>' + name + '</b>';
+	d.append(span);
+	d.append(s1);
+	div.append(d);
+}
+function createGroup(){
+	var groupName = $('#groupName').val();
+	if(groupName == ""){
+		alert("Please Enter group name");
+		return;
+	}
+	var selected = [username];
+	$('input:checked').each(function() {
+	    selected.push($(this).attr('id'));
+	});
+	console.log(selected);
+	var createGroup = {};
+	createGroup.groupName = groupName;
+	createGroup.users = selected;
+	console.log(createGroup);
+	$.ajax({
+        url: 'http://localhost:4000/createGroup',
+        data: createGroup,
+        type: 'POST',
+        success: function (data) {
+			if(data == "Success"){
+            	console.log('Success: ');
+				var div = $("#user");
+				createGroup.filename = "";
+				groupData.push(createGroup);
+				addUserToDiv(div, groupData.length - 1, "", groupName, 1);
+				closeGroupPopup();
+			}
+			else{
+				alert("Group Name already exists! Please choose a new one");
+			}
+        },
+        error: function (xhr, status, error) {
+            console.log('Error: ' + error.message);
+        },
+    });
+}
+function closeGroupPopup(){
+	document.getElementById("groupPopup").style.display = "none";
+	$('input:checkbox').removeAttr('checked');
+}
+function closePopupOverlay(){
+	$(".popup-overlay, .popup-content").removeClass('active');
+}
+function closePopupOverlayImage(){
+	$(".popup-overlay-image, .popup-content-image").removeClass('active');
+}
+function openGroupCreate(id){
+	document.getElementById("groupPopup").style.display = "block";
+
+}
 $(function() {
 	var socket = io.connect('http://localhost:4000');
 	var message = $("#message");
 	var chatroom = $("#chatroom");
 	var send_message = $("#send_message");
 	var div = $("#user");
-	var count = 0;
+	console.log(groupData);
 	$('#OpenImgUpload').click(function(){
-		if(count == 0) {
 			$(".popup-overlay, .popup-content").addClass('active');
-			$('#currImage').attr('src', 'image/' + profilename);
-			count = 1;
-		}
-		else {
-			$(".popup-overlay, .popup-content").removeClass('active');
-			count = 0;
-		}
+			if(profilename == "avatar.jpg"){
+				$('#currImage').attr('src', 'avatar.jpg');
+			}
+			else
+				$('#currImage').attr('src', 'image/' + profilename);
+
 	});
 	var c = 0;
 	for(var i = -1; i < data.length; i++){
 		if(i == -1){
 			var d = document.createElement("div");
 			d.setAttribute("class", "user");
+			d.setAttribute('onclick', 'openGroupCreate()');
 			var img = document.createElement("img");
 			img.setAttribute('class', 'avatar1');
 			img.setAttribute('src', 'group.png');
@@ -115,59 +206,70 @@ $(function() {
 			continue;
 		}
 		if(data[i].username != username) {
-			var d = document.createElement("div");
-			var id = data[i].username + "_" + data[i].filename + "_" + data[i].name;
-			d.setAttribute("id", id);
-			d.setAttribute("class", "user");
-			d.setAttribute('onclick', 'openChat('+'\"' + id + '\"' +')');
-			var img = document.createElement("img");
-			img.setAttribute('class', 'avatar1');
-			var fname;
-			if(data[i].filename == ""){
-				img.setAttribute('src', './avatar.jpg');
-				fname = 'avatar.jpg';
-			}
-			else {
-				img.setAttribute('src', 'image/' + data[i].filename);
-				fname = data[i].filename;
-			}
-			img.setAttribute('onclick', 'clickfunc('+ '\"'+ fname + '\"' +')');
-			d.append(img);
-			var s1 = document.createElement("span");
-			var feedback = "feedback_" + data[i].username;
-			s1.setAttribute('id', feedback);
-			s1.setAttribute('class', 'feedback');
-			var span = document.createElement("span");
-			span.setAttribute('class', 'username');
-			span.innerHTML = '<b>' + data[i].name + '</b>';
-			d.append(span);
-			d.append(s1);
-			div.append(d);
+			addUserToDiv(div, data[i].username, data[i].filename, data[i].name , 0);
 		}
+	}
+	for(var i = 0; i < groupData.length; i++){
+		addUserToDiv(div, i, groupData[i].filename, groupData[i].username, 1);
 	}
 	//Emit message
 	send_message.click(function(){
 		console.log("button clicked");
 		var timeStamp = new Date();
+		var contents1 = message.val();
 		var contents = cutAndJoinContent(message.val());
 		chatroom.append("<p class='senderMessage' style = 'float : right' ><b>" + username + "</b><br>" + contents + "<br>" + "<span style = 'float : right; font-size : 0.8vw'>" + timeStamp.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}) + "</span>" + "<br>" + "</p>" + "<br>");
-		socket.emit('new_message', {"senderId": username,"receiverId": send_user,"contents": message.val(),"timeStamp": timeStamp});
-		var feedback = "feedback_" + data.username;
-		document.getElementById(feedback).innerHTML = "";
+		var msg = document.getElementById("chatroom");
+		msg.scrollTop = msg.scrollHeight;
 		document.getElementById("message").value = "";
+		console.log(contents1);
+		socket.emit('new_message', {"senderId": username,"receiverId": send_user,"contents": contents1,"timeStamp": timeStamp});
+		var feedback = "feedback_" + data.username;
+		//document.getElementById(feedback).innerHTML = "";
+
 	});
 
 	//Listen on new_message
 	socket.on("newMessage", (params) => {
-		//const params = JSON.parse(_params);
 		const senderId = params.senderId;
 		const receiverId = params.receiverId;
 		var contents = params.contents;
 		var chatTimeStamp = new Date(params.timeStamp);
+		var otherId = senderId;
 		console.log(chatTimeStamp);
 		console.log(params);
-		var contents = cutAndJoinContent(contents);
-		chatroom.append("<p class='receiverMessage'><b>" + senderId + "</b><br>" + contents + "<br>" + "<span style = 'float : right; font-size : 0.8vw'>" + chatTimeStamp.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}) + "</span>" + "<br>" + "</p>" + "<br>");
+		//Get otherId
+		if(senderId != username && receiverId != username){
+			otherId = receiverId;
+		}
+		//Get current chatroom
+		var currentChatRoom = false;
+		if(otherId == send_user){
+			currentChatRoom = true;
+		}
+		console.log(currentChatRoom);
+		console.log(contents);
+		//Inflate or show popup correspondingly
+		if(currentChatRoom){
+			var contents = cutAndJoinContent(contents);
+			chatroom.append("<p class='receiverMessage' style = 'float:left'><b>" + senderId + "</b><br>" + contents + "<br>" + "<span style = 'float : right; font-size : 0.8vw'>" + chatTimeStamp.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}) + "</span>" + "<br>" + "</p>" + "<br>");
+			var msg = document.getElementById("chatroom");
+			msg.scrollTop = msg.scrollHeight;
+			console.log("hi");
+		} else{
+			// TODO:  Show new Message with differnet color pop-up
+			var chatbar = document.getElementsByClassName('user');
+			console.log(chatbar);
+			for(var i = 1; i < chatbar.length; i++){
+				var id = chatbar[i].id;
+				var id1 = id.split('_');
+				if(id1[0] == senderId){
+					chatbar[i].style.backgroundColor = "#24f224";
+					console.log(id);
+					break;
+				}
+			}
+		}
 	});
 
 	//Emit typing
