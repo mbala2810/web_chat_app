@@ -1,0 +1,297 @@
+.loginbox {
+	width : 320px;
+	height : 420px;
+	background : #fff;
+	color : #000;
+	top : 50%;
+	left : 50%;
+	position : absolute;
+	transform : translate(-50%, -50%);
+	box-sizing : border-box;
+	padding : 70px 30px;
+}
+
+.avatar {
+	width : 100px;
+	height : 100px;
+	border-radius : 50%;
+	position : absolute;
+	top : -50px;
+	left : calc(50% - 50px);
+}
+.avatar1 {
+	width : 5vw;
+	height : 5vw;
+	border-radius : 50%;
+	padding : 8px;
+}
+.currImage {
+	width : 320px;
+	height : 336px;
+	padding : 3%;
+}
+.currImage1 {
+	width : 400px;
+	height : 432px;
+	padding : 3%;
+}
+.avatar1:hover{
+	cursor : pointer;
+}
+.popup-overlay, .popup-overlay-image {
+	/* width: 50%;
+	height: 75%; */
+	position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    text-align:center;
+	background-color: black;
+	color : #d3d3d3;
+	/* transform: translateY(-50%);
+	transform: translateX(50%); */
+	display : none;
+}
+
+.popup-content, .popup-content-image {
+	position: absolute;
+    top: 50%;
+    left:0;
+    right:0;
+    transform: translateY(-50%);
+    display:block;
+    text-align:center
+	display:none;
+}
+.popup-overlay.active, .popup-overlay-image.active{
+	display:block;
+	text-align:center;
+}
+
+.popup-content.active, .popup-content-image.active{
+	display:block;
+}
+html {
+	height: 100%;
+	font-family: 'Comfortaa', sans-serif;
+}
+section#header{
+	width : 500px;
+}
+section#chatroom {
+	height: 360px;
+	overflow: auto;
+}
+
+section#input_zone {
+	height: 7%;
+	text-align: center;
+	width : 90%;
+ 	display: inline-block;
+ 	padding-left: 2%;
+ 	margin : 2%;
+ 	margin-right : 90%;
+}
+.div1{
+	width : 20%;
+	vertical-align: middle;
+	margin: 1%;
+	height: 90vh;
+	float: left;
+}
+#message{
+	width : 65%;
+	height : 2.5em;
+	background-color: #81DAF5;
+	vertical-align: middle;
+	border-radius: 20px;
+	margin: 1%;
+}
+#groupName{
+	width : 25%;
+	height : 2.5em;
+	background-color: #d3d3d3;
+	vertical-align: middle;
+	border-radius: 20px;
+	margin: 2%;
+}
+
+.message, .senderMessage, .receiverMessage{
+	width : 50%;
+	padding : 2%;
+	font-size : 1.2vw;
+	/* word-wrap: normal;
+	overflow-y: auto; */
+	height : auto;
+	background-color: #81BEF7;
+	border-radius: 10px;
+	margin: 1%;
+}
+/* .senderMessage{
+	background-image : url('sender.9.png');
+	background-position: center;
+ 	background-repeat: no-repeat;
+ 	background-size: cover;
+}
+.receiverMessage{
+	background-image : url('receiver.9.png');
+	background-position: center;
+ 	background-repeat: no-repeat;
+ 	background-size: cover;
+} */
+.user:nth-child(even) {
+	background-color: #81DAF5;
+}
+span.username{
+	padding : 5px;
+	display : inline-block;
+	width : 14vw;
+	white-space: nowrap;
+	overflow: hidden !important;
+	text-overflow: ellipsis;
+}
+.feedback{
+	padding : 10px;
+	display : inline-block;
+	margin-left : -14vw;
+	margin-bottom: -5vw;
+}
+.container {
+    white-space: nowrap;
+}
+.user:nth-child(odd) {
+	background-color: #81BEF7;
+}
+.user{
+	height : 5vw;
+	padding-bottom: 5px;
+	font-size : 1.25vw;
+}
+#user{
+	height : 500px;
+	overflow : auto;
+}
+.h11 {
+	margin : 0;
+	padding : 0 0 20px;
+	text-align : center;
+	font-size : 22px;
+}
+
+.loginbox input{
+	width : 100%;
+	margin-bottom : 50px;
+}
+
+.loginbox input[type = "text"], input[type = "password"]{
+	border : none;
+	border-bottom : 1px solid #000;
+	background : transparent;
+	outline : none;
+	height : 40px;
+	color : #000;
+	font-size : 16px;
+}
+
+.loginbox input[type = "submit"]{
+	border : none;
+	outline : none;
+	height : 40px;
+	background : #00BFFF;
+	padding : 5px;
+	color : #000;
+	font-size : 18px;
+	border-radius : 20px;
+}
+
+.loginbox input[type = "submit"]:hover{
+	cursor : pointer;
+	background : #ffc107;
+	color : #000;
+}
+
+a {
+	float : right;
+	font-size : 15px;
+	color : #00BFFF;
+	top : -50px;
+}
+a:hover{
+	color : #ffc107;
+}
+#error{
+	color : red;
+	font-size : 12px;
+}
+.logout{
+	float : right;
+	font-size : 1.5vw;
+	background-color : #00BFFF;
+	height : 5vw;
+	border-radius : 20px;
+	width : 15vw;
+}
+.logout:hover{
+	background-color : #ffc107;
+}
+
+
+#groupPopup {
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    text-align:center;
+	background-color: black;
+}
+#groupPopup>div.wrapper {
+    position: absolute;
+    top: 50%;
+    left:0;
+    right:0;
+    transform: translateY(-50%);
+    display:block;
+    text-align:center
+	color : #d3d3d3;
+}
+#groupPopup .content {
+    /* display:inline-block; */
+	height : 30vw;
+	transform: translateX(50%);
+	background-color: #d3d3d3;
+	overflow: auto;
+	text-align: center;
+	padding : 5%;
+    /* border:1px solid blue //For visual feedback.*/
+    max-width:50%; //In case you want to restrict the div width
+}
+
+.closeImage, .close{
+	float : right;
+	margin : 2%;
+	margin-left: 0%;
+	padding : 1%;
+	font-size : 1vw;
+	border-radius: 50%;
+	color: #d3d3d3;
+	background-color: #ffc107;
+}
+.close:hover {
+	pointer: cursor;
+}
+.closeImage:hover{
+	pointer: cursor;
+}
+.closeImage{
+	margin-top : -5%;
+}
+
+table{
+	margin : 3%;
+}
+td, th{
+	padding : 8%;
+	text-align : left;
+}

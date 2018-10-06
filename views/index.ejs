@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Chat App</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="http://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" type="text/css" href="styles.css" >
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+		<link rel="stylesheet" href="emojionearea.css">
+	</head>
+	<body onload = "update()" style = "white-space: nowrap;">
+		<nav class="navbar navbar-default">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<ul class="nav navbar-nav" style = "padding : 8px;">
+						<li style = "padding-right : 30px;">
+							<img src = "avatar.jpg" class = "avatar1" id = "OpenImgUpload">
+						</li>
+						<li>
+							<h1 style="font-size:2.5vw;">Let's Chat</h1>
+						</li>
+					</ul>
+				</div>
+				<ul class="nav navbar-nav navbar-right" style = "padding : 10px;">
+					<li>
+						<form method="post" action="/logout">
+		  					<input class = "logout" type="submit" value = "Logout <%= username%>" style = "float : right;">
+	  					</form>
+  					</li>
+				</ul>
+			</div>
+		</nav>
+		<div class="popup-overlay">
+			<div class="popup-content">
+				<h3 class = "closeImage" onclick = "closePopupOverlay()"> X </h3><br>
+				<h3>Upload Your Profile Picture</h3>
+				<img src = "avatar.jpg" class = "currImage" id = "currImage">
+				<form action = "/imgUpload" method = "post" enctype="multipart/form-data">
+					<label for="file" class="custom-file-upload">
+					<input type="file" name="file" id="file" accept="image/jpeg, image/png" class="custom-file-upload" single required/>
+					</label>
+					<br><br>
+					<input type = "submit" name = "submit" value = "Upload" class = "btn btn-info"/>
+				</form>
+			</div>
+		</div>
+		<div class="popup-overlay-image">
+			<div class="popup-content-image">
+				<h3 class = "closeImage" onclick = "closePopupOverlayImage()"> X </h3><br>
+				<img src = "avatar.jpg" class = "currImage1" id = "clickImage">
+			</div>
+		</div>
+		<div class = "div1" id = "user">
+		</div>
+		<div id = "chatbox" style = "display:none;">
+			<section id = "header" style = " border: 5px outset #81BEF7; margin-left : 25%;width : 72%;background-color:#81DAF5;">
+				<div>
+					<img src = "avatar.jpg" class = "avatar1" id = "sendUserImage">
+					<span id = "send_user" style="font-size:2vw;"></span>
+				</div>
+			</section>
+			<section id="chatroom" style = "margin-left : 25%;border: 5px outset #81BEF7;width : 72%;background-color:#81DAF5;">
+				<!-- <section id="feedback"></section> -->
+			</section>
+
+			<section id="input_zone">
+ 					<input id="message" type="text" placeholder = "Type a message" data-emojiable="true"/>
+ 					<img id = "send_message" src = "send.png" class = "avatar1" style = "padding:0px; padding-left: 5px; margin-right : -56%; margin-top : -4.75em">
+ 			</section>
+		</div>
+		<div id="groupPopup" style = "display:none;">
+		    <div class="wrapper">
+				<h3 class = "close" onclick = "closeGroupPopup()"> X </h3><br>
+				<h3>Create your own group</h3><br>
+				<div class = "content">
+					<table id = "usersTable">
+					<% for (var key in data) { %>
+						<% if(data[key].name != username){ %>
+							<tr>
+								<td><img src = "image/<%= data[key].filename%>" class = "avatar1" onerror="this.src='avatar.jpg';"></td>
+								<td style = "width : 20vw;"><h5><%= data[key].name %></h5></td>
+							    <td>
+									<input type = "checkbox" name = "addUsers" id = <%=data[key].username%>>
+								</td>
+							</tr>
+						<% } else { %>
+						<% } %>
+					<% } %>
+					</table>
+				</div>
+				<br>
+				<input id="groupName" type="text" placeholder = "Enter Group Name"/>
+				<br>
+				<button onclick = "createGroup()" class = "btn btn-info">Create Group</button>
+		    </div>
+		</div>
+		<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+		<script type="text/javascript" src="emojionearea.js"></script>
+		<script>
+			var data =<%-JSON.stringify(data)%>
+			var username =<%-JSON.stringify(username)%>
+			var groupData =<%-JSON.stringify(group)%>
+			$(document).ready(function() {
+     			$("#message").emojioneArea();
+   		});
+		</script>
+		<script src="chat.js"></script>
+	</body>
+</html>
