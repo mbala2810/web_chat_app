@@ -224,8 +224,8 @@ $(function() {
 		document.getElementById("message").value = "";
 		console.log(contents1);
 		socket.emit('new_message', {"senderId": username,"receiverId": send_user,"contents": contents1,"timeStamp": timeStamp});
-		var feedback = "feedback_" + data.username;
-		//document.getElementById(feedback).innerHTML = "";
+		// var feedback = "feedback_" + send_user;
+		// document.getElementById(feedback).innerHTML = "";
 
 	});
 
@@ -279,8 +279,9 @@ $(function() {
 
 	//Listen on typing
 	socket.on('typing', (data) => {
-		var feedback = "feedback_" + data.username;
-		document.getElementById(feedback).innerHTML = "<i>typing...</i>";
+		// var feedback = "feedback_" + data.username;
+		// document.getElementById(feedback).innerHTML = "<i>typing...</i>";
+		return;
 	});
 
 });

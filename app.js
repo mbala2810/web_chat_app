@@ -23,7 +23,7 @@ app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
 app.use(cors());
 const conn = mongoose.createConnection(mongoURI);
-
+var sess;
 // Init gfs
 let gfs;
 
@@ -99,6 +99,7 @@ app.get('/image/:filename', function(req, res){
     });
 });
 app.post('/imgUpload', upload.single('file'),function(req, res){
+    console.log(sess);
 	User.find({username:sess.username}, function(err, data){
 		if(err){
 			res.send(err);
@@ -111,6 +112,7 @@ app.post('/imgUpload', upload.single('file'),function(req, res){
 				res.send(err);
 				return;
 			}
+        //    console.log(sess.username);
 			User.findOneAndUpdate({username:sess.username},{filename:fileuploaded},{upsert:true}, function(err, user){
 				if(err){
 					res.send(err);
@@ -123,10 +125,10 @@ app.post('/imgUpload', upload.single('file'),function(req, res){
 		});
 	});
 });
-var sess;
 app.get('/chat', function(req, res) {
 	sess = req.session;
-	console.log('hello');
+	//console.log('hello');
+
 	if(sess.username) {
 		currusername = sess.username + "";
 		User.find({}, function(err, data){
@@ -139,7 +141,6 @@ app.get('/chat', function(req, res) {
                     console.log(err);
                     return;
                 }
-                console.log(data1);
                 res.render('index', {username: sess.username, data: data, group: data1});
             });
 		});
@@ -161,7 +162,7 @@ app.post('/login', function(req, res){
 			});
 		}
 		else {
-			console.log(req.body);
+		//	console.log(req.body);
 			var myData = new User({
 				name : req.body.name,
 				college : req.body.college,
@@ -188,9 +189,12 @@ app.post('/chat', function(req, res){
 		}
 		if(data.length >= 1) {
 			sess = req.session;
+            //console.log("HELLLLAAAAA");
+            // console.log(sess);
 			currusername = sess.username + "";
 			sess.username = req.body.username;
-			var data1;
+            console.log(sess);
+            var data1;
 			User.find({}, function(err, data){
 				if(err){
 					console.log(err);
@@ -201,9 +205,8 @@ app.post('/chat', function(req, res){
                         console.log(err);
                         return;
                     }
-                    console.log(data1);
+                    //console.log(data1);
                     res.render('index', {username: sess.username, data: data, filename : data[0].filename, group : data1});
-                console.log("booo");
                 });
 			});
 		}
@@ -228,8 +231,8 @@ app.get('/allChats',function(req,res){
     var y = x[1].split('&');
     senderId = y[0];
     receiverId = x[2];
-    console.log(senderId);
-    console.log(receiverId);
+    // console.log(senderId);
+    // console.log(receiverId);
     // query here , {"sort" : ['timeStamp', 'asc']}
     Message.find({ $or: [ { sender: senderId, receiver: receiverId } , { sender: receiverId, receiver: senderId} ]}).sort({timeStamp : 1}).exec(function(err,data) {
         if(err){
@@ -237,7 +240,7 @@ app.get('/allChats',function(req,res){
           return;
         }
         else{
-          console.log(data);
+        //  console.log(data);
           res.send(data);
           return;
         }
@@ -245,7 +248,7 @@ app.get('/allChats',function(req,res){
   //Message.find({ $or: [ { senderId: senderId } , { senderId: receiverId } ] }).sort({ timeStamp : 1 })
 });
 app.post('/createGroup', function(req, res){
-    console.log(req.body);
+    //console.log(req.body);
     var group = new Group({
         username : req.body.groupName,
         members : req.body.users,
@@ -276,8 +279,7 @@ io.on('connection', (socket) => {
 		//default username
 		if(sess) {
 			socket.username = sess.username;
-      console.log("boo");
-      console.log(sess.username);
+            //console.log(sess.username);
 		}
     sockets[socket.username] = socket;
     //console.log(sess.username);
@@ -289,7 +291,7 @@ io.on('connection', (socket) => {
 
 	//listen on new_message
 	socket.on('new_message', (params) => {
-        console.log("Inside listener");
+        //console.log("Inside listener");
     //const params = JSON.parse(_params);
 		const senderId = params.senderId;
 		const receiverId = params.receiverId;
@@ -306,7 +308,7 @@ io.on('connection', (socket) => {
         tempMessage.save();
 		if(sockets[receiverId]){
 			const toSocket = sockets[receiverId];
-            console.log("received");
+            //console.log("received");
 			toSocket.emit('newMessage', params);
 		} else{
 			console.log("User not connected to socket");

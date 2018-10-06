@@ -9,6 +9,7 @@
   		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+		<link rel="stylesheet" href="emojionearea.css">
 	</head>
 	<body onload = "update()" style = "white-space: nowrap;">
 		<nav class="navbar navbar-default">
@@ -64,11 +65,10 @@
 			<section id="chatroom" style = "margin-left : 25%;border: 5px outset #81BEF7;width : 72%;background-color:#81DAF5;">
 				<!-- <section id="feedback"></section> -->
 			</section>
-
-			<section id="input_zone">
-				<input id="message" type="text" placeholder = "Type a message"/>
-				<img id = "send_message" src = "send.png" class = "avatar1">
-			</section>
+				<section id="input_zone">
+					<input id="message" type="text" placeholder = "Type a message" data-emojiable="true"/>
+					<img id = "send_message" src = "send.png" class = "avatar1" style = "padding:0px; padding-left: 5px; margin-right : -56%; margin-top : -4.75em">
+				</section>
 		</div>
 		<div id="groupPopup" style = "display:none;">
 		    <div class="wrapper">
@@ -97,11 +97,16 @@
 		    </div>
 		</div>
 		<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+		<script type="text/javascript" src="emojionearea.js"></script>
 		<script>
 			var data =<%-JSON.stringify(data)%>
 			var username =<%-JSON.stringify(username)%>
 			var groupData =<%-JSON.stringify(group)%>
+			$(document).ready(function() {
+    			$("#message").emojioneArea();
+  			});
 		</script>
 		<script src="chat.js"></script>
+
 	</body>
 </html>

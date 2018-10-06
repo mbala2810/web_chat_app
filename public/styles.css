@@ -87,6 +87,11 @@ section#chatroom {
 section#input_zone {
 	height: 7%;
 	text-align: center;
+	width : 90%;
+	display: inline-block;
+	padding-left: 2%;
+	margin : 2%;
+	margin-right : 90%;
 }
 .div1{
 	width : 20%;
@@ -290,3 +295,5 @@ td, th{
 	padding : 8%;
 	text-align : left;
 }
+
+/* height:32px;min-height:20px;overflow:hidden;white-space:nowrap;position:absolute;top:0;left:12px;right:24px;padding:6px 0 */
